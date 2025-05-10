@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TransactionForm } from '@/components/forms/TransactionForm';
 import { TransactionItem } from '@/components/transactions/TransactionItem';
 import useLocalStorage from '@/lib/hooks/useLocalStorage';
-import type { Income, Expense } from '@/types/budget';
-import { PlusCircle, Edit3 } from 'lucide-react';
+import type { Income, Expense, AlertSetting } from '@/types/budget';
+import { PlusCircle } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -18,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 
 type TransactionToEdit = (Income | Expense) & { type: 'income' | 'expense' };
@@ -59,34 +58,74 @@ export default function TransactionsPage() {
 
   const handleAddExpense = (data: Omit<Expense, 'id' | 'date'> & {date: string}) => {
     const newExpense: Expense = { ...data, id: crypto.randomUUID() };
-    setExpenses((prev) => [newExpense, ...prev].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    
+    // Calculate the state *after* adding the new expense
+    const nextExpensesState = [newExpense, ...expenses].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setExpenses(nextExpensesState);
+    setShowForm(null);
+
+    let overspendingAlertShown = false;
     // Check for alerts
     const alertSetting = alerts.find(a => a.category === newExpense.category);
     if (alertSetting) {
-      const categoryTotal = expenses.filter(e => e.category === newExpense.category).reduce((sum, e) => sum + e.amount, 0) + newExpense.amount;
+      const categoryTotal = nextExpensesState // Use the new state for calculation
+        .filter(e => e.category === newExpense.category)
+        .reduce((sum, e) => sum + e.amount, 0);
+      
       if (categoryTotal > alertSetting.limit) {
         toast({
           title: 'Alert: Overspending!',
           description: `You've spent $${categoryTotal.toFixed(2)} on ${newExpense.category}, exceeding your limit of $${alertSetting.limit.toFixed(2)}.`,
           variant: 'destructive',
         });
+        overspendingAlertShown = true;
       }
     }
-    setShowForm(null);
-    toast({ title: 'Expense Added', description: `${data.category}: $${data.amount}` });
+    
+    if (!overspendingAlertShown) {
+      toast({ title: 'Expense Added', description: `${data.category}: $${data.amount}` });
+    }
   };
 
   const handleEditTransaction = (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!editingTransaction) return;
-    const updatedTransaction = { ...editingTransaction, ...data, id: editingTransaction.id };
+    
+    const updatedTransactionData = { ...editingTransaction, ...data, id: editingTransaction.id };
+
     if (editingTransaction.type === 'income') {
-      setIncome(prev => prev.map(inc => inc.id === updatedTransaction.id ? updatedTransaction as Income : inc).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    } else {
-      setExpenses(prev => prev.map(exp => exp.id === updatedTransaction.id ? updatedTransaction as Expense : exp).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      const updatedIncome = updatedTransactionData as Income;
+      setIncome(prev => prev.map(inc => inc.id === updatedIncome.id ? updatedIncome : inc).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      setEditingTransaction(null);
+      toast({ title: 'Transaction Updated', description: `Successfully updated income.` });
+    } else { // Editing an expense
+      const editedExpense = updatedTransactionData as Expense;
+      const nextExpensesState = expenses
+        .map(exp => exp.id === editedExpense.id ? editedExpense : exp)
+        .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      setExpenses(nextExpensesState);
+      setEditingTransaction(null);
+
+      let overspendingAlertShown = false;
+      const alertSettingForCurrentCategory = alerts.find(a => a.category === editedExpense.category);
+      if (alertSettingForCurrentCategory) {
+        const categoryTotalAfterEdit = nextExpensesState
+          .filter(e => e.category === editedExpense.category)
+          .reduce((sum, e) => sum + e.amount, 0);
+
+        if (categoryTotalAfterEdit > alertSettingForCurrentCategory.limit) {
+          toast({
+            title: 'Alert: Overspending Update!',
+            description: `Spending for ${editedExpense.category} is now $${categoryTotalAfterEdit.toFixed(2)}, over the $${alertSettingForCurrentCategory.limit.toFixed(2)} limit.`,
+            variant: 'destructive',
+          });
+          overspendingAlertShown = true;
+        }
+      }
+      
+      if (!overspendingAlertShown) {
+        toast({ title: 'Transaction Updated', description: `Successfully updated expense.` });
+      }
     }
-    setEditingTransaction(null);
-    toast({ title: 'Transaction Updated', description: `Successfully updated transaction.` });
   };
 
   const openEditModal = (transaction: Income | Expense, type: 'income' | 'expense') => {
@@ -103,8 +142,6 @@ export default function TransactionsPage() {
     toast({ title: 'Expense Deleted' });
   };
 
-  const transactionsToShow = activeTab === 'income' ? income : expenses;
-
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -112,17 +149,17 @@ export default function TransactionsPage() {
         description="Add, view, and manage your income and expenses."
         actions={
           <div className="flex gap-2">
-            <Button onClick={() => { setShowForm('income'); setActiveTab('income'); }} variant="outline">
+            <Button onClick={() => { setEditingTransaction(null); setShowForm('income'); setActiveTab('income'); }} variant="outline">
               <PlusCircle className="mr-2 h-4 w-4" /> Add Income
             </Button>
-            <Button onClick={() => { setShowForm('expense'); setActiveTab('expense'); }} variant="outline">
+            <Button onClick={() => { setEditingTransaction(null); setShowForm('expense'); setActiveTab('expense'); }} variant="outline">
               <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
             </Button>
           </div>
         }
       />
 
-      <Dialog open={showForm !== null} onOpenChange={(isOpen) => !isOpen && setShowForm(null)}>
+      <Dialog open={showForm !== null} onOpenChange={(isOpen) => { if (!isOpen) setShowForm(null); }}>
         <DialogContent className="sm:max-w-[425px] md:max-w-lg">
           <DialogHeader>
             <DialogTitle>Add New {showForm === 'income' ? 'Income' : 'Expense'}</DialogTitle>
@@ -132,7 +169,7 @@ export default function TransactionsPage() {
           </DialogHeader>
           {showForm && (
             <TransactionForm
-              key={showForm} // Ensure form remounts/resets when type changes
+              key={`add-${showForm}`} // Ensure form remounts/resets when type changes
               type={showForm}
               onSubmit={showForm === 'income' ? handleAddIncome : handleAddExpense}
               onCancel={() => setShowForm(null)}
@@ -141,7 +178,7 @@ export default function TransactionsPage() {
         </DialogContent>
       </Dialog>
       
-      <Dialog open={editingTransaction !== null} onOpenChange={(isOpen) => !isOpen && setEditingTransaction(null)}>
+      <Dialog open={editingTransaction !== null} onOpenChange={(isOpen) => { if (!isOpen) setEditingTransaction(null); }}>
         <DialogContent className="sm:max-w-[425px] md:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit {editingTransaction?.type === 'income' ? 'Income' : 'Expense'}</DialogTitle>
@@ -169,9 +206,9 @@ export default function TransactionsPage() {
             <CardHeader>
               <CardTitle>Income List</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
               {income.length === 0 ? (
-                <p className="text-muted-foreground">No income recorded yet.</p>
+                <p className="text-muted-foreground py-4 text-center">No income recorded yet.</p>
               ) : (
                 income.map((item) => (
                   <TransactionItem
@@ -191,9 +228,9 @@ export default function TransactionsPage() {
             <CardHeader>
               <CardTitle>Expense List</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
               {expenses.length === 0 ? (
-                <p className="text-muted-foreground">No expenses recorded yet.</p>
+                <p className="text-muted-foreground py-4 text-center">No expenses recorded yet.</p>
               ) : (
                 expenses.map((item) => (
                   <TransactionItem
