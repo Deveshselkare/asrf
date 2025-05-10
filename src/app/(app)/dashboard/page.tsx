@@ -1,29 +1,46 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from 'lucide-react';
+import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb, BarChart3 as BarChartIcon } from 'lucide-react'; // Renamed BarChart3 to avoid conflict
 import Link from 'next/link';
 import useLocalStorage from '@/lib/hooks/useLocalStorage';
 import type { Income, Expense, AlertSetting } from '@/types/budget';
 import { PageHeader } from '@/components/PageHeader';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 export default function DashboardPage() {
   const [income] = useLocalStorage<Income[]>('income', []);
   const [expenses] = useLocalStorage<Expense[]>('expenses', []);
   const [alerts] = useLocalStorage<AlertSetting[]>('alerts', []);
 
-  const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
-  const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
-  const balance = totalIncome - totalExpenses;
+  const [totalIncome, setTotalIncome] = useState<number | null>(null);
+  const [totalExpenses, setTotalExpenses] = useState<number | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [activeAlertsCount, setActiveAlertsCount] = useState<number | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  // Find active alerts (example logic, can be more sophisticated)
-  const activeAlertsCount = alerts.filter(alert => {
-    const categoryExpenses = expenses
-      .filter(exp => exp.category === alert.category)
-      .reduce((sum, exp) => sum + exp.amount, 0);
-    return categoryExpenses > alert.limit;
-  }).length;
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      const currentTotalIncome = income.reduce((sum, item) => sum + item.amount, 0);
+      const currentTotalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+      setTotalIncome(currentTotalIncome);
+      setTotalExpenses(currentTotalExpenses);
+      setBalance(currentTotalIncome - currentTotalExpenses);
+
+      const currentActiveAlertsCount = alerts.filter(alert => {
+        const categoryExpenses = expenses
+          .filter(exp => exp.category === alert.category)
+          .reduce((sum, exp) => sum + exp.amount, 0);
+        return categoryExpenses > alert.limit;
+      }).length;
+      setActiveAlertsCount(currentActiveAlertsCount);
+    }
+  }, [income, expenses, alerts, isClient]);
 
   return (
     <div className="space-y-6">
@@ -37,10 +54,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {balance === null ? 'Loading...' : `$${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             </div>
             <p className="text-xs text-muted-foreground">
-              Income: ${totalIncome.toLocaleString()} | Expenses: ${totalExpenses.toLocaleString()}
+              {totalIncome === null || totalExpenses === null ? 'Loading...' : `Income: $${totalIncome.toLocaleString()} | Expenses: $${totalExpenses.toLocaleString()}`}
             </p>
           </CardContent>
         </Card>
@@ -50,9 +67,9 @@ export default function DashboardPage() {
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeAlertsCount}</div>
+            <div className="text-2xl font-bold">{activeAlertsCount === null ? '...' : activeAlertsCount}</div>
             <p className="text-xs text-muted-foreground">
-              {activeAlertsCount > 0 ? "Check your spending limits!" : "No active alerts."}
+              {activeAlertsCount === null ? 'Loading...' : activeAlertsCount > 0 ? "Check your spending limits!" : "No active alerts."}
             </p>
           </CardContent>
         </Card>
@@ -93,7 +110,7 @@ export default function DashboardPage() {
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
            <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
+              <BarChartIcon className="h-5 w-5 text-primary" />
               Visualize Your Spending
             </CardTitle>
             <CardDescription>See where your money goes with insightful charts.</CardDescription>
