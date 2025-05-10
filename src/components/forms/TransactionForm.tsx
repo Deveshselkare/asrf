@@ -52,10 +52,10 @@ export function TransactionForm({ type, onSubmit, initialData, onCancel }: Trans
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: initialData?.amount || undefined,
+      amount: initialData?.amount ?? '', // Ensure controlled: use '' if undefined
       date: initialData?.date ? new Date(initialData.date) : new Date(),
       description: initialData?.description || '',
-      source: type === 'income' ? (initialData as Income)?.source || '' : undefined,
+      source: type === 'income' ? ((initialData as Income)?.source || '') : '', // Ensure controlled: use '' if undefined or not applicable
       category: type === 'expense' ? (initialData as Expense)?.category || undefined : undefined,
     },
   });
@@ -194,3 +194,4 @@ export function TransactionForm({ type, onSubmit, initialData, onCancel }: Trans
     </Form>
   );
 }
+
