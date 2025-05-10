@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb } from 'lucide-react';
+import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import useLocalStorage from '@/lib/hooks/useLocalStorage';
 import type { Income, Expense, AlertSetting } from '@/types/budget';
