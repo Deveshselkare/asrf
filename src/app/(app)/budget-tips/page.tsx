@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useLocalStorage from '@/lib/hooks/useLocalStorage';
-import type { Income, Expense, ExpenseCategory } from '@/types/budget';
+import type { Income, Expense } from '@/types/budget';
 import { generateBudgetTipsAction } from './actions';
 import { Lightbulb, Zap, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
@@ -20,8 +20,6 @@ export default function BudgetTipsPage() {
   const { toast } = useToast();
 
   const [currentIncome, setCurrentIncome] = useState<number>(() => {
-    // Calculate average monthly income or take latest if available.
-    // For simplicity, let's sum all income. A more robust app might average or ask user.
     return incomeData.reduce((sum, item) => sum + item.amount, 0);
   });
   const [tips, setTips] = useState<string[]>([]);
@@ -121,7 +119,7 @@ export default function BudgetTipsPage() {
             <Label>Current Aggregated Expenses</Label>
             <Textarea
               readOnly
-              value={aggregateExpenses().map(e => `${e.category}: $${e.amount.toFixed(2)}`).join('\n') || 'No expenses recorded yet.'}
+              value={aggregateExpenses().map(e => `${e.category}: ${Number(e.amount).toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})}`).join('\n') || 'No expenses recorded yet.'}
               className="mt-1 h-32 bg-muted/50"
               placeholder="Expenses will be summarized here from your transaction records."
             />

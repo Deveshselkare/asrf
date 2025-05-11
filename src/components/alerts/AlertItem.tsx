@@ -1,5 +1,5 @@
 'use client';
-import type { AlertSetting, Expense, ExpenseCategory } from '@/types/budget';
+import type { AlertSetting, Expense } from '@/types/budget';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -40,18 +40,18 @@ export function AlertItem({ alert, expenses, onEdit, onDelete }: AlertItemProps)
           </div>
         </div>
         <CardDescription>
-          Limit: ${alert.limit.toLocaleString(undefined, {minimumFractionDigits: 2})}
+          Limit: {alert.limit.toLocaleString('en-IN', {style: 'currency', currency: 'INR', minimumFractionDigits: 2})}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="flex justify-between items-center text-sm mb-1">
-          <span>Spent: ${currentSpending.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+          <span>Spent: {currentSpending.toLocaleString('en-IN', {style: 'currency', currency: 'INR', minimumFractionDigits: 2})}</span>
           {isOverLimit && <AlertTriangle className="h-4 w-4 text-destructive" />}
         </div>
         <Progress value={progressPercentage} className={isOverLimit ? '[&>div]:bg-destructive' : '[&>div]:bg-primary'} />
         {isOverLimit && (
           <p className="text-xs text-destructive mt-1">
-            You've exceeded your limit by ${(currentSpending - alert.limit).toLocaleString(undefined, {minimumFractionDigits: 2})}!
+            You've exceeded your limit by {(currentSpending - alert.limit).toLocaleString('en-IN', {style: 'currency', currency: 'INR', minimumFractionDigits: 2})}!
           </p>
         )}
       </CardContent>

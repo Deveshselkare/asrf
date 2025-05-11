@@ -53,36 +53,35 @@ export default function TransactionsPage() {
     const newIncome: Income = { ...data, id: crypto.randomUUID() };
     setIncome((prev) => [newIncome, ...prev].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     setShowForm(null);
-    toast({ title: 'Income Added', description: `${data.source}: $${data.amount}` });
+    toast({ title: 'Income Added', description: `${data.source}: ${Number(data.amount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}` });
   };
 
   const handleAddExpense = (data: Omit<Expense, 'id' | 'date'> & {date: string}) => {
     const newExpense: Expense = { ...data, id: crypto.randomUUID() };
-    // Calculate the state *after* adding the new expense
     const nextExpensesState = [newExpense, ...expenses].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setExpenses(nextExpensesState);
     setShowForm(null);
 
     let overspendingAlertShown = false;
-    // Check for alerts
     const alertSetting = alerts.find(a => a.category === newExpense.category);
     if (alertSetting) {
-      const categoryTotal = nextExpensesState // Use the new state for calculation
+      const categoryTotal = nextExpensesState
         .filter(e => e.category === newExpense.category)
         .reduce((sum, e) => sum + e.amount, 0);
       
       if (categoryTotal > alertSetting.limit) {
         toast({
           title: 'Alert: Overspending!',
-          description: `You've spent $${categoryTotal.toFixed(2)} on ${newExpense.category}, exceeding your limit of $${alertSetting.limit.toFixed(2)}.`,
+          description: `You've spent ${categoryTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})} on ${newExpense.category}, exceeding your limit of ${alertSetting.limit.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})}.`,
           variant: 'destructive',
+          duration: 10000, // Keep alert visible longer
         });
         overspendingAlertShown = true;
       }
     }
     
     if (!overspendingAlertShown) {
-      toast({ title: 'Expense Added', description: `${data.category}: $${data.amount}` });
+      toast({ title: 'Expense Added', description: `${data.category}: ${Number(data.amount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}` });
     }
   };
 
@@ -115,8 +114,9 @@ export default function TransactionsPage() {
         if (categoryTotalAfterEdit > alertSettingForCurrentCategory.limit) {
           toast({
             title: 'Alert: Overspending Update!',
-            description: `Spending for ${editedExpense.category} is now $${categoryTotalAfterEdit.toFixed(2)}, over the $${alertSettingForCurrentCategory.limit.toFixed(2)} limit.`,
+            description: `Spending for ${editedExpense.category} is now ${categoryTotalAfterEdit.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})}, over the ${alertSettingForCurrentCategory.limit.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})} limit.`,
             variant: 'destructive',
+            duration: 10000, // Keep alert visible longer
           });
           overspendingAlertShown = true;
         }
@@ -169,7 +169,7 @@ export default function TransactionsPage() {
           </DialogHeader>
           {showForm && (
             <TransactionForm
-              key={`add-${showForm}`} // Ensure form remounts/resets when type changes
+              key={`add-${showForm}`} 
               type={showForm}
               onSubmit={showForm === 'income' ? handleAddIncome : handleAddExpense}
               onCancel={() => setShowForm(null)}

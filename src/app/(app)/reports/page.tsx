@@ -59,7 +59,7 @@ export default function ReportsPage() {
             Expense Breakdown
           </CardTitle>
           <CardDescription>
-            See how your expenses are distributed across categories. Total: ${totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+            See how your expenses are distributed across categories. Total: {totalExpenses.toLocaleString('en-IN', {style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2})}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -76,7 +76,15 @@ export default function ReportsPage() {
               <PieChart>
                 <ChartTooltip
                   cursor={false}
-                  content={<ChartTooltipContent hideLabel />}
+                  content={<ChartTooltipContent 
+                    formatter={(value, name, props) => {
+                      return [
+                        `${(props.payload?.percent * 100).toFixed(0)}% - ${Number(value).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`,
+                        props.payload?.name
+                      ]
+                    }}
+                    hideLabel 
+                  />}
                 />
                 <Pie
                   data={chartData}
@@ -87,7 +95,7 @@ export default function ReportsPage() {
                   outerRadius={120}
                   innerRadius={60}
                   labelLine={false}
-                  label={({ percent, name }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ percent, name, value }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
                   {chartData.map((entry) => (
                     <Cell key={`cell-${entry.name}`} fill={ALL_CATEGORIES.find(c => c.name === entry.name)?.color || 'hsl(var(--muted))'} />
@@ -113,4 +121,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb, BarChart2 as BarChartIcon } from 'lucide-react'; 
+import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import useLocalStorage from '@/lib/hooks/useLocalStorage';
 import type { Income, Expense, AlertSetting } from '@/types/budget';
@@ -14,10 +14,10 @@ export default function DashboardPage() {
   const [expenses] = useLocalStorage<Expense[]>('expenses', []);
   const [alerts] = useLocalStorage<AlertSetting[]>('alerts', []);
 
-  const [totalIncome, setTotalIncome] = useState<number | null>(null);
-  const [totalExpenses, setTotalExpenses] = useState<number | null>(null);
-  const [balance, setBalance] = useState<number | null>(null);
-  const [activeAlertsCount, setActiveAlertsCount] = useState<number | null>(null);
+  const [totalIncome, setTotalIncome] = useState<number>(0);
+  const [totalExpenses, setTotalExpenses] = useState<number>(0);
+  const [balance, setBalance] = useState<number>(0);
+  const [activeAlertsCount, setActiveAlertsCount] = useState<number>(0);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -41,11 +41,19 @@ export default function DashboardPage() {
       setActiveAlertsCount(currentActiveAlertsCount);
     }
   }, [income, expenses, alerts, isClient]);
-
+  
   const renderLoading = <span className="text-sm text-muted-foreground">Loading...</span>;
-  const formatCurrency = (value: number | null) => 
-    value === null ? renderLoading : `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const formatCurrency = (value: number | null, options?: Intl.NumberFormatOptions) => {
+    if (!isClient || value === null) return renderLoading;
+    return value.toLocaleString('en-IN', { 
+      style: 'currency', 
+      currency: 'INR', 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2,
+      ...options 
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -62,9 +70,9 @@ export default function DashboardPage() {
               {formatCurrency(balance)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {totalIncome === null || totalExpenses === null 
-                ? renderLoading 
-                : `Income: $${totalIncome.toLocaleString()} | Expenses: $${totalExpenses.toLocaleString()}`
+              {!isClient
+                ? renderLoading
+                : `Income: ${formatCurrency(totalIncome, {minimumFractionDigits: 0, maximumFractionDigits: 0})} | Expenses: ${formatCurrency(totalExpenses, {minimumFractionDigits: 0, maximumFractionDigits: 0})}`
               }
             </p>
           </CardContent>
@@ -75,10 +83,10 @@ export default function DashboardPage() {
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeAlertsCount === null ? renderLoading : activeAlertsCount}</div>
+            <div className="text-2xl font-bold">{!isClient ? renderLoading : activeAlertsCount}</div>
             <p className="text-xs text-muted-foreground">
-              {activeAlertsCount === null 
-                ? renderLoading 
+              {!isClient
+                ? renderLoading
                 : activeAlertsCount > 0 ? "Check your spending limits!" : "No active alerts."
               }
             </p>
@@ -121,7 +129,7 @@ export default function DashboardPage() {
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
            <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChartIcon className="h-5 w-5 text-primary" />
+              <BarChart3 className="h-5 w-5 text-primary" />
               Visualize Your Spending
             </CardTitle>
             <CardDescription>See where your money goes with insightful charts.</CardDescription>
@@ -133,7 +141,7 @@ export default function DashboardPage() {
               width={400} 
               height={200} 
               className="rounded-md object-cover aspect-[2/1]"
-              data-ai-hint="finance chart" 
+              data-ai-hint="finance chart"
             />
             <Button asChild variant="link" className="mt-2 p-0 h-auto">
               <Link href="/reports">View Reports</Link>

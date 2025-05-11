@@ -31,7 +31,7 @@ export default function AlertsPage() {
       // Update existing alert
       const updatedAlerts = alerts.map(a => a.id === editingAlert.id ? { ...a, ...data } : a);
       setAlerts(updatedAlerts);
-      toast({ title: 'Alert Updated', description: `Limit for ${data.category} is now $${data.limit}.` });
+      toast({ title: 'Alert Updated', description: `Limit for ${data.category} is now ${Number(data.limit).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}.` });
     } else {
       // Add new alert
       if (alerts.some(alert => alert.category === data.category)) {
@@ -40,7 +40,7 @@ export default function AlertsPage() {
       }
       const newAlert: AlertSetting = { ...data, id: crypto.randomUUID() };
       setAlerts((prev) => [...prev, newAlert]);
-      toast({ title: 'Alert Set', description: `Spending limit for ${data.category} set to $${data.limit}.` });
+      toast({ title: 'Alert Set', description: `Spending limit for ${data.category} set to ${Number(data.limit).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}.` });
     }
     setIsFormOpen(false);
     setEditingAlert(null);

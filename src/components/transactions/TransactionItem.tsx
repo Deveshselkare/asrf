@@ -1,8 +1,8 @@
 'use client';
-import type { Income, Expense, ExpenseCategory } from '@/types/budget';
+import type { Income, Expense } from '@/types/budget';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Trash2, Edit3, ArrowUpCircle, ArrowDownCircle, type LucideIcon } from 'lucide-react';
+import { Trash2, Edit3, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { getCategoryIcon, getCategoryColor } from '@/config/categories';
 import { format, parseISO } from 'date-fns';
 
@@ -19,6 +19,8 @@ export function TransactionItem({ transaction, type, onEdit, onDelete }: Transac
   const Icon = category ? getCategoryIcon(category) : (isExpense ? ArrowDownCircle : ArrowUpCircle);
   const iconColor = category ? getCategoryColor(category) : (isExpense ? 'text-destructive' : 'text-green-500');
   const title = isExpense ? (transaction as Expense).category : (transaction as Income).source;
+  const amountFormatted = Number(transaction.amount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+
 
   return (
     <Card className="mb-3 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -37,7 +39,7 @@ export function TransactionItem({ transaction, type, onEdit, onDelete }: Transac
         </div>
         <div className="flex items-center gap-2">
           <span className={`font-semibold ${isExpense ? 'text-destructive' : 'text-green-600'}`}>
-            {isExpense ? '-' : '+'}${transaction.amount.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}
+            {isExpense ? '-' : '+'}{amountFormatted}
           </span>
           <Button variant="ghost" size="icon" onClick={() => onEdit(transaction)} aria-label="Edit transaction">
             <Edit3 className="h-4 w-4" />
