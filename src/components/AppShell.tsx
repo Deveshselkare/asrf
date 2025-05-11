@@ -17,7 +17,7 @@ const getPageTitle = (pathname: string): string => {
   if (pathname.startsWith('/reports')) return 'Reports';
   if (pathname.startsWith('/alerts')) return 'Alerts';
   if (pathname.startsWith('/budget-tips')) return 'AI Budget Tips';
-  return 'BudgetWise';
+  return 'PennyPocket';
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'BudgetWise - Smart Budgeting',
-  description: 'Manage your expenses smartly with BudgetWise.',
+  title: 'PennyPocket - Smart Budgeting',
+  description: 'Manage your expenses smartly with PennyPocket.',
 };
 
 export default function RootLayout({

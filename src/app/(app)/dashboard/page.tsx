@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb, BarChart3 as BarChartIcon } from 'lucide-react'; // Renamed BarChart3 to avoid conflict
+import { PlusCircle, TrendingUp, AlertTriangle, Lightbulb, BarChart2 as BarChartIcon } from 'lucide-react'; 
 import Link from 'next/link';
 import useLocalStorage from '@/lib/hooks/useLocalStorage';
 import type { Income, Expense, AlertSetting } from '@/types/budget';
@@ -42,9 +42,14 @@ export default function DashboardPage() {
     }
   }, [income, expenses, alerts, isClient]);
 
+  const renderLoading = <span className="text-sm text-muted-foreground">Loading...</span>;
+  const formatCurrency = (value: number | null) => 
+    value === null ? renderLoading : `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+
   return (
     <div className="space-y-6">
-      <PageHeader title="Welcome to BudgetWise!" description="Here's a quick overview of your finances." />
+      <PageHeader title="Welcome to PennyPocket!" description="Here's a quick overview of your finances." />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -54,10 +59,13 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {balance === null ? 'Loading...' : `$${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              {formatCurrency(balance)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {totalIncome === null || totalExpenses === null ? 'Loading...' : `Income: $${totalIncome.toLocaleString()} | Expenses: $${totalExpenses.toLocaleString()}`}
+              {totalIncome === null || totalExpenses === null 
+                ? renderLoading 
+                : `Income: $${totalIncome.toLocaleString()} | Expenses: $${totalExpenses.toLocaleString()}`
+              }
             </p>
           </CardContent>
         </Card>
@@ -67,9 +75,12 @@ export default function DashboardPage() {
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeAlertsCount === null ? '...' : activeAlertsCount}</div>
+            <div className="text-2xl font-bold">{activeAlertsCount === null ? renderLoading : activeAlertsCount}</div>
             <p className="text-xs text-muted-foreground">
-              {activeAlertsCount === null ? 'Loading...' : activeAlertsCount > 0 ? "Check your spending limits!" : "No active alerts."}
+              {activeAlertsCount === null 
+                ? renderLoading 
+                : activeAlertsCount > 0 ? "Check your spending limits!" : "No active alerts."
+              }
             </p>
           </CardContent>
         </Card>
