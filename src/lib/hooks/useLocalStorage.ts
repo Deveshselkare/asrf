@@ -13,43 +13,59 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
     }
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        return JSON.parse(item);
+      } else {
+        window.localStorage.setItem(key, JSON.stringify(initialValue));
+        return initialValue;
+      }
     } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
   });
-  
+
   useEffect(() => {
-    if (isClient) {
-      try {
-        const item = window.localStorage.getItem(key);
-        if (item) {
-          setStoredValue(JSON.parse(item));
-        } else {
-           
-           window.localStorage.setItem(key, JSON.stringify(initialValue));
-           setStoredValue(initialValue);
-        }
-      } catch (error) {
-        console.error(`Error reading localStorage key "${key}" in useEffect:`, error);
-        setStoredValue(initialValue);
-      }
+    if (!isClient) {
+      return;
     }
-  
-  }, [key, isClient, initialValue]);
 
-
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    if (!isClient) return;
+    let newValue;
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      const item = window.localStorage.getItem(key);
+      if (item) {
+        newValue = JSON.parse(item);
+      } else {
+        window.localStorage.setItem(key, JSON.stringify(initialValue));
+        newValue = initialValue;
+      }
     } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
+      newValue = initialValue;
     }
-  }, [key, storedValue, isClient]);
+
+    if (JSON.stringify(storedValue) !== JSON.stringify(newValue)) {
+      setStoredValue(newValue);
+    }
+    // This effect depends on `key` and `isClient`.
+    // `initialValue` (from closure) is used if a new key needs seeding.
+    // `storedValue` (from closure) is used for comparison.
+    // Neither `initialValue` nor `storedValue` are direct dependencies of this
+    // effect, which prevents loops caused by unstable `initialValue` references.
+  }, [key, isClient]);
+
+  const setValue = useCallback(
+    (value: T | ((val: T) => T)) => {
+      if (!isClient) return;
+      try {
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+        setStoredValue(valueToStore);
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      } catch (error) {
+        // Error during setValue can be handled here if necessary
+      }
+    },
+    [key, storedValue, isClient] 
+  );
 
   return [storedValue, setValue];
 }
