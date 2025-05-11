@@ -20,7 +20,7 @@ import {
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useLocalStorage<AlertSetting[]>('alerts', []);
-  const [expenses] = useLocalStorage<Expense[]>('expenses', []); // To calculate current spending
+  const [expenses] = useLocalStorage<Expense[]>('expenses', []); 
   const { toast } = useToast();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -28,12 +28,12 @@ export default function AlertsPage() {
 
   const handleSetAlert = (data: Omit<AlertSetting, 'id'>) => {
     if (editingAlert) {
-      // Update existing alert
+      
       const updatedAlerts = alerts.map(a => a.id === editingAlert.id ? { ...a, ...data } : a);
       setAlerts(updatedAlerts);
       toast({ title: 'Alert Updated', description: `Limit for ${data.category} is now ${Number(data.limit).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}.` });
     } else {
-      // Add new alert
+      
       if (alerts.some(alert => alert.category === data.category)) {
         toast({ title: 'Alert Exists', description: `An alert for ${data.category} already exists. Edit it instead.`, variant: 'destructive' });
         return;

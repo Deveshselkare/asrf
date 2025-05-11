@@ -74,7 +74,7 @@ export default function TransactionsPage() {
           title: 'Alert: Overspending!',
           description: `You've spent ${categoryTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})} on ${newExpense.category}, exceeding your limit of ${alertSetting.limit.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})}.`,
           variant: 'destructive',
-          duration: 10000, // Keep alert visible longer
+          duration: 10000, 
         });
         overspendingAlertShown = true;
       }
@@ -85,7 +85,7 @@ export default function TransactionsPage() {
     }
   };
 
-  const handleEditTransaction = (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleEditTransaction = (data: any) => { 
     if (!editingTransaction) return;
     
     const updatedTransactionData = { ...editingTransaction, ...data, id: editingTransaction.id };
@@ -95,7 +95,7 @@ export default function TransactionsPage() {
       setIncome(prev => prev.map(inc => inc.id === updatedIncome.id ? updatedIncome : inc).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
       setEditingTransaction(null);
       toast({ title: 'Transaction Updated', description: `Successfully updated income.` });
-    } else { // Editing an expense
+    } else { 
       const editedExpense = updatedTransactionData as Expense;
       const nextExpensesState = expenses
         .map(exp => exp.id === editedExpense.id ? editedExpense : exp)
@@ -116,7 +116,7 @@ export default function TransactionsPage() {
             title: 'Alert: Overspending Update!',
             description: `Spending for ${editedExpense.category} is now ${categoryTotalAfterEdit.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})}, over the ${alertSettingForCurrentCategory.limit.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2})} limit.`,
             variant: 'destructive',
-            duration: 10000, // Keep alert visible longer
+            duration: 10000, 
           });
           overspendingAlertShown = true;
         }

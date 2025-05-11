@@ -8,9 +8,9 @@ import {
 import { SidebarNav } from './SidebarNav';
 import { Header } from './Header';
 import { usePathname } from 'next/navigation';
-import { ThemeProvider } from 'next-themes' // Assuming next-themes is or will be installed
+import { ThemeProvider } from 'next-themes' 
 
-// Helper to get page title from pathname
+
 const getPageTitle = (pathname: string): string => {
   if (pathname.startsWith('/dashboard')) return 'Dashboard';
   if (pathname.startsWith('/transactions')) return 'Transactions';

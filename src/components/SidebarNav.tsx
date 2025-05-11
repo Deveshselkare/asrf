@@ -11,7 +11,7 @@ import {
   ArrowLeftRight,
   BarChart3,
   BellRing,
-  Lightbulb as LightbulbIcon, // Renamed to avoid conflict with component
+  Lightbulb as LightbulbIcon, 
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useSidebar } from '@/components/ui/sidebar';

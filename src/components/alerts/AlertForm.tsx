@@ -53,7 +53,7 @@ export function AlertForm({ onSubmit, initialData, existingAlertCategories = [],
 
   const handleSubmit = (values: FormValues) => {
     onSubmit(values);
-    form.reset({ category: undefined, limit: undefined }); // Reset form after submission
+    form.reset({ category: undefined, limit: undefined }); 
   };
 
   return (

@@ -1,13 +1,5 @@
-// src/ai/flows/budget-tips.ts
 'use server';
 
-/**
- * @fileOverview Provides AI-powered personalized budgeting tips based on user's income and expenses.
- *
- * - getBudgetTips - A function that generates budget tips for the user.
- * - BudgetTipsInput - The input type for the getBudgetTips function.
- * - BudgetTipsOutput - The return type for the getBudgetTips function.
- */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';

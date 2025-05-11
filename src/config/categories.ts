@@ -7,7 +7,7 @@ export const CATEGORIES_CONFIG: Record<ExpenseCategory, { icon: LucideIcon; colo
   'Housing': { icon: Home, color: 'hsl(var(--chart-3))' },
   'Utilities': { icon: Lightbulb, color: 'hsl(var(--chart-4))' },
   'Entertainment': { icon: Popcorn, color: 'hsl(var(--chart-5))' },
-  'Healthcare': { icon: Stethoscope, color: 'hsl(var(--chart-1))' }, // Re-using chart colors for more categories
+  'Healthcare': { icon: Stethoscope, color: 'hsl(var(--chart-1))' }, 
   'Shopping': { icon: ShoppingBag, color: 'hsl(var(--chart-2))' },
   'Personal Care': { icon: Sparkles, color: 'hsl(var(--chart-3))' },
   'Education': { icon: BookOpen, color: 'hsl(var(--chart-4))' },

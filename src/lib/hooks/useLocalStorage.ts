@@ -27,7 +27,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
         if (item) {
           setStoredValue(JSON.parse(item));
         } else {
-           // If no item, set the initial value in localStorage
+           
            window.localStorage.setItem(key, JSON.stringify(initialValue));
            setStoredValue(initialValue);
         }
@@ -36,8 +36,8 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
         setStoredValue(initialValue);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, isClient]);
+  
+  }, [key, isClient, initialValue]);
 
 
   const setValue = useCallback((value: T | ((val: T) => T)) => {

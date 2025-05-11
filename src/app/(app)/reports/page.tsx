@@ -108,7 +108,7 @@ export default function ReportsPage() {
         </CardContent>
       </Card>
       
-      {/* Placeholder for more charts */}
+      
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Income vs. Expenses Over Time</CardTitle>

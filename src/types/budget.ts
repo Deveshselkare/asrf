@@ -15,13 +15,13 @@ export type ExpenseCategory =
 export interface CategoryConfig {
   name: ExpenseCategory;
   icon: LucideIcon;
-  color: string; // for charts, e.g. 'hsl(var(--chart-1))'
+  color: string; 
 }
 
 export interface Income {
   id: string;
   amount: number;
-  date: string; // Store as ISO string
+  date: string; 
   source: string;
   description?: string;
 }
@@ -29,7 +29,7 @@ export interface Income {
 export interface Expense {
   id: string;
   amount: number;
-  date: string; // Store as ISO string
+  date: string; 
   category: ExpenseCategory;
   description?: string;
 }
@@ -38,5 +38,5 @@ export interface AlertSetting {
   id: string;
   category: ExpenseCategory;
   limit: number;
-  // currentSpending will be calculated on the fly
+  
 }

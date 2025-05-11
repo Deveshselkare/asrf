@@ -31,7 +31,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface TransactionFormProps {
   type: 'income' | 'expense';
-  onSubmit: (data: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  onSubmit: (data: any) => void; 
   initialData?: Partial<Income & Expense>;
   onCancel?: () => void;
 }
@@ -52,10 +52,10 @@ export function TransactionForm({ type, onSubmit, initialData, onCancel }: Trans
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: initialData?.amount ?? '', // Ensure controlled: use '' if undefined
+      amount: initialData?.amount ?? '', 
       date: initialData?.date ? new Date(initialData.date) : new Date(),
       description: initialData?.description || '',
-      source: type === 'income' ? ((initialData as Income)?.source || '') : '', // Ensure controlled: use '' if undefined or not applicable
+      source: type === 'income' ? ((initialData as Income)?.source || '') : '', 
       category: type === 'expense' ? (initialData as Expense)?.category || undefined : undefined,
     },
   });
@@ -63,7 +63,7 @@ export function TransactionForm({ type, onSubmit, initialData, onCancel }: Trans
   const handleSubmit = (values: FormValues) => {
     const dataToSubmit = {
       ...values,
-      date: format(values.date, 'yyyy-MM-dd'), // Store date as string
+      date: format(values.date, 'yyyy-MM-dd'), 
     };
     onSubmit(dataToSubmit);
     form.reset();
@@ -194,4 +194,3 @@ export function TransactionForm({ type, onSubmit, initialData, onCancel }: Trans
     </Form>
   );
 }
-
